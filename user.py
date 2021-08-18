@@ -38,7 +38,8 @@ class User:
             while s_mode[0].lower() != "d" and s_mode[0].lower() != "c":
                 s_mode = input('User settings [default/custom]: ')
             self.settings = self.get_settings(s_mode)
-            self.orders = self.get_orders()
+            self.orders = []
+            self.get_orders()
             print("Setup successful. Starting program")
     def get_settings(self, mode):
         descriptions = {
@@ -75,7 +76,13 @@ class User:
 
 
     def get_orders(self):
-        return []
+        print("\nORDER INITIALIZATION\n")
+        inp = "none"
+        while imp.lower() != 'q' and imp.lower() != "quit":
+            inp = input("Type a command [add/delete/modify/quit]: ")
+            if inp.lower() == 'a' or imp.lower() == 'add':
+                #DEFINE A CLASS FUNCTION FOR THIS
+        return
     def get_data(self):
         data = {"name" : self.name,
                 "netid": self.netid,
