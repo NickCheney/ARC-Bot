@@ -33,15 +33,47 @@ class User:
             print("Local user data not found, please provide the following (data will only be stored locally):")
             self.name = input("Name: ")
             self.netid = input("Queen's NetID: ")
-            self.netid = input("Current NetID password: ")
-            s_mode = None
-            while s_mode != "default" and s_mode != "custom":
-                s_mode = input('User settings (enter "default" or "custom"): ')
+            self.password = input("Current NetID password: ")
+            s_mode = "N"
+            while s_mode[0].lower() != "d" and s_mode[0].lower() != "c":
+                s_mode = input('User settings [default/custom]: ')
             self.settings = self.get_settings(s_mode)
             self.orders = self.get_orders()
             print("Setup successful. Starting program")
     def get_settings(self, mode):
-        return {}
+        descriptions = {
+                "Booking frequency:" : {
+                    "minimal" : "waits until 1 minute before the next requested order to browse the site",
+                    "periodic" : "attempts to fulfil any eligible requested orders every 5 minutes"
+                    },
+                "Area search type:" : {
+                    "string" : "searches for workout areas containing a user provided string",
+                    "specified" : "user specifies the exact name(s) of the desired workout areas"
+                    }
+                }
+
+        settings = {}
+        if mode[0].lower() == "d":
+            for setting in descriptions.keys():
+                settings[setting] = list(descriptions[setting].keys())[0]
+            return settings
+
+        print("\nSETTINGS\n")
+        for setting in descriptions.keys():
+            print(setting)
+            for val in descriptions[setting].keys():
+                print('\t',val,'-',descriptions[setting][val])
+            print()
+        
+        for setting in descriptions.keys():
+            options = descriptions[setting].keys()
+            choice = None
+            while choice not in options:
+                choice = input("{0} [{1}]: ".format(setting, "/".join(options)))
+            settings[setting] = choice
+        return settings
+
+
     def get_orders(self):
         return []
     def get_data(self):
