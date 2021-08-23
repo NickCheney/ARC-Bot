@@ -16,11 +16,13 @@ def main():
 
     action = 's'
     while action[0].lower() != 'q':
-        action = input("Select an option [start/edit/quit]: ")
+        action = input("Select an option [start/edit/view/quit]: ")
         if action[0].lower() == 's':
             session.start()
         elif action[0].lower() == 'e':
             session.edit()
+        elif action[0].lower() == 'v':
+            session.view()
         
     print("Saving data and exiting")
     session.save()

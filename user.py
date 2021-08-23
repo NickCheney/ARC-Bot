@@ -1,6 +1,6 @@
 import os
 import pickle
-from orders import RequestedOrder, TimeRange, TimeRangeList
+from orders import OrderList, TimeRange, TimeRangeList
 from datetime import date, time, datetime
 
 class Session:
@@ -14,23 +14,40 @@ class Session:
             self.SeshUser = User()
         else:
             with open(self.user_data_file,'rb') as f:
-                udata = pickle.load(f)
-            self.SeshUser = User(udata)
-    
+                user = pickle.load(f)
+            #self.SeshUser = User(udata)
+            self.SeshUser = user
+            print("Welcome, {}.".format(self.SeshUser.name))
     def start(self):
-        if len(self.SeshUser.orders) == 0:
-            print("You don't have any orders! Create some to get started")
+        while len(self.SeshUser.orders.orders) == 0:
+            print("You don't have any orders! Add some to get started")
             self.SeshUser.get_orders()
             self.save()
         
         print("Starting program, type CTRL-Z to exit...")
         #start program here
+        '''
+        while True:
+            #make sure list is sorted
+            remove_obselete orders()
+            not = get_next_order_time()
+            while not xmin before not:
+                hibernate
+            attempt_to_book()
+            #should refresh until desired time
+            #then try and book in all areas
+            print(success/failure)
+            if success:
+                remove order from orderlist
+        '''
     def edit(self):
+        pass
+    def view(self):
         pass
     def save(self):
         with open(self.user_data_file, 'wb') as f:
-            pickle.dump(self.SeshUser.get_data(), f)
-
+            #pickle.dump(self.SeshUser.get_data(), f)
+            pickle.dump(self.SeshUser, f)
 
 class User:
     def __init__(self, data = None):
@@ -40,7 +57,6 @@ class User:
             self.orders = data['orders']
             self.name = data['name']
             self.settings = data['settings']
-            self.next_order_id = 0
             print("Welcome, {}. Starting program".format(self.name))
         else:
             print("Local user data not found, please provide the following (data will only be stored locally):")
@@ -51,7 +67,7 @@ class User:
             while s_mode[0].lower() != "d" and s_mode[0].lower() != "c":
                 s_mode = input('User settings [default/custom]: ')
             self.settings = self.get_settings(s_mode)
-            self.orders = []
+            self.orders = OrderList()
             get_ord = input("Add orders [y/n]?: ")
             if get_ord[0].lower() == 'y':
                 self.get_orders()
@@ -121,7 +137,7 @@ class User:
         cont = 'y'
         while cont[0].lower() == 'y':
             try:
-                trangestr = input("Time range [??:?? ?M - ??:?? ?M]:")
+                trangestr = input("Time range [??:?? ?M - ??:?? ?M]: ")
                 t1, t2 = trangestr.split(' - ')
                 trange = TimeRange(t1, t2)
 
@@ -148,25 +164,48 @@ class User:
         while cont[0].lower() == 'y':
             a1 = input(prompt)
             oalist.append(a1)
-            cont = input("Add another area [y/n]?: ")
+            cont = input("Add another area as backup [y/n]?: ")
         
         oidn = self.next_order_id
         
-        sconf = input("Create weekly series from order? [y/n]?: ")
+        sconf = input("Create weekly series from order [y/n]?: ")
         
         #add checking for conflicts with other orders
         if sconf[0].lower() == 'y':
-            print("Series not supported yet")            
             #Create a series of orders starting with this one here until a specified date
+            s_end_date = False
+            while not s_end_date:
+                try:
+                    datestr = input("Enter the series end date [YYYY-MM-DD]: ")
+                    s_end_date = date.fromisoformat(datestr)
+                    if s_end_date < odate:
+                        raise ValueError
+                except:
+                    print("Please enter a valid date after series start")
+            self.orders.add_series(odate, otimes, oalist, s_end_date)
         else:
-            newOrder = RequestedOrder(odate, otimes, oalist, oidn)
-            self.orders.append(newOrder)
-        print("Order successfully added!")
-        self.next_order_id += 1
+            self.orders.add_order(odate, otimes, oalist)
         return
         
     def delete_order(self):
-        pass
+        ntype = "Order"
+        self.orders.print_orders()
+        do_series = input("Delete a series [y/n]?: ")
+        series = do_series[0].lower() == 'y'
+        if series:
+            ntype = "Series"
+        num = False
+        while not num:
+            try:
+                nstr = input("{} number to delete".format(ntype))
+                num = int(nstr)
+            except:
+                print("Please enter a valid {} number from above".format(ntype))
+        if series:
+            self.orders.remove_series(num)
+        else:
+            self.orders.remove_order(num)
+        
     def modify_order(self):
         pass
 

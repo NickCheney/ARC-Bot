@@ -17,7 +17,7 @@ DRIVER_PATH=os.environ.get("DRIVER_PATH")
 #set driver options
 CHROME_OPTIONS = webdriver.chrome.options.Options()
 '''Add to prevent graphical browswer display'''
-chrome_options.add_argument("--headless")
+CHROME_OPTIONS.add_argument("--headless")
 
 BASE_URL = os.environ.get("BASE_URL")
 
