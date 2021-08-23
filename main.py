@@ -1,9 +1,8 @@
 """
 Main entry point for program event loop
 """
-
 from book_workout import book_workout
-from datetime import date, time
+#from datetime import date, time
 from user import Session
 def main():
 
