@@ -16,14 +16,14 @@ DRIVER_PATH=os.environ.get("DRIVER_PATH")
 
 #set driver options
 CHROME_OPTIONS = webdriver.chrome.options.Options()
-'''Add to prevent graphical browswer display
-chrome_options.add_argument("--headless")'''
+'''Add to prevent graphical browswer display'''
+chrome_options.add_argument("--headless")
 
 BASE_URL = os.environ.get("BASE_URL")
 
-USERNAME = os.environ.get("USERNAME")
+#USERNAME = os.environ.get("USERNAME")
 
-PASSWORD = os.environ.get("PASSWORD")
+#PASSWORD = os.environ.get("PASSWORD")
 
 def str_to_date(date):
     return datetime.strptime(date, "%A, %B %d, %Y").date()
@@ -37,8 +37,11 @@ def in_timerange(min_start, max_end, s_start, s_end):
     return False
     
 
-def book_workout(reserve_types, excluding, req_date, times):
-    print(DRIVER_PATH)
+def book_workout(username, password, order):
+    reserve_types = order.areas
+    excluding = [""]
+    #integrate exclusions into settings
+
     try:
         driver = webdriver.Chrome(DRIVER_PATH, options = CHROME_OPTIONS)
          
@@ -52,8 +55,8 @@ def book_workout(reserve_types, excluding, req_date, times):
         login_button.click()
         username_entry = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.ID, 'username')))
-        username_entry.send_keys(USERNAME)
-        driver.find_element_by_id('password').send_keys(PASSWORD)
+        username_entry.send_keys(username)
+        driver.find_element_by_id('password').send_keys(password)
         driver.find_element_by_xpath('//*[@id="qw-region-content-inner"]/div/form/div[3]/button').click()
         driver.find_element_by_xpath('//*[@id="mainContent"]/div[2]/div[1]/div[1]/a').click()
         soup = BeautifulSoup(driver.page_source, 'html.parser')

@@ -3,7 +3,7 @@ from datetime import date, time, datetime
 class RequestedOrder:
         def __init__(self, date, times, alist, idn, series=None):
             self.date = date
-            self.times = sorted(times, key = x[0])
+            self.times = times
             self.areas = alist
             self.id = idn
             self.series = series
@@ -26,7 +26,8 @@ class TimeRange:
         self.format = frmt
 
     def conflicts_with(self, TR2):
-        if (self.t2 >= TR2.t1 and self.t2 <= TR2.t2) or (self.t1 >= TR2.t1 and self.t1 <= TR2.t2):
+        if ((self.t2 >= TR2.t1 and self.t2 <= TR2.t2) 
+                or (self.t1 >= TR2.t1 and self.t1 <= TR2.t2)):
             return True
         return False
     
@@ -38,27 +39,28 @@ class TimeRange:
 class TimeRangeList:
     def __init__(self, ranges=[]):
         self.time_ranges = ranges
-        self.time_ranges.sort()
+        self.sort_ranges()
         return
 
     def print_ranges(self,prefix=""):
         for tr in self.time_ranges:
-            print(prefix + tr.print_range())
+            print(prefix, end="")
+            tr.print_range()
         return
 
     def delete_range(self, ndx):
-        pass
+        del self.time_ranges[ndx]
 
     def add_range(self, new_range):
         for rng in self.time_ranges:
             if new_range.conflicts_with(rng):
-                print("New time range conflicts with an existing range")
+                print("New time range has conflicts and could not be added")
                 return
         self.time_ranges.append(new_range)
         self.sort_ranges()
         return
     
     def sort_ranges(self):
-        self.time_ranges.sort(lambda x: x.t1)
+        self.time_ranges.sort(key=lambda x: x.t1)
         return
 

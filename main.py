@@ -13,7 +13,16 @@ def main():
 
     #book_workout(rtypes, excl, day, tm)
     session = Session()
-    print("Saving data")
+
+    action = 's'
+    while action[0].lower() != 'q':
+        action = input("Select an option [start/edit/quit]: ")
+        if action[0].lower() == 's':
+            session.start()
+        elif action[0].lower() == 'e':
+            session.edit()
+        
+    print("Saving data and exiting")
     session.save()
 
     return
