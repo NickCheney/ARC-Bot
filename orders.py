@@ -1,4 +1,5 @@
 from datetime import date, time, datetime, timedelta
+import copy
 
 class RequestedOrder:
         def __init__(self, date, times, alist, idn, series):
@@ -9,9 +10,9 @@ class RequestedOrder:
             self.series = series
 
         def print_details(self):
-            print("ORDER {}".format(self.id),end="")
+            print(f"ORDER {self.id}",end="")
             if self.series != None:
-                print(" | Series {}".format(self.series))
+                print(f" | Series {self.series}")
             else:
                 print()
             print(self.date.isoformat() + " | ",end="")
@@ -40,59 +41,127 @@ class OrderList:
         self.next_order_id = 0
         self.next_series_id = 0
 
+    def conflicts_with(self, order2, excluding = None):
+        #below code cannot be performed when only sorting after modifying 
+        #or creating a new series, less efficient than searching entire list
+        '''
+        if (order2.date < self.orders[0].date 
+                or order2.date > self.orders[-1].date):
+            #before earliest current order date or after latest
+            return False
+        '''
+        for order in self.orders:
+            if order2.conflicts_with(order):
+                if excluding == order:
+                    continue
+                return True
+        return False
+    
+    def get_order(self, order_id):
+        for order in self.orders:
+            if order.id == order_id:
+                return order
+        print(f"Order {order_id} not found")
+        return False
+
+    def get_series(self, series_id):
+        ids = [o.id for o in self.orders if o.series == series_id]
+        if len(ids) == 0:
+            print(f"Series {series_id} not found")
+            return False
+        return ids
+
     def add_order(self, date, times, alist, series = None):
         new_order = RequestedOrder(date, times, alist, self.next_order_id, series)
-
-        for order in self.orders:
-            if date > order.date:
-                #past latest date in sorted list
-                break
-            elif new_order.conflicts_with(order):
-                print("New order conflicts with existing order, could not be added.")
-                print("New:")
-                new_order.print_details()
-                print("Old:")
-                order.print_details()
-                return
-        print("Order successfully added!")
+        if self.conflicts_with(new_order):
+            print("New order conflicts with existing one, could not be added.")
+            print("New:")
+            new_order.print_details()
+            print("Old:")
+            order.print_details()
+            return
         self.orders.append(new_order)
+        print(f"Order {series.next_order_id} successfully added!")
 
         if not series:
-            self.sort()
+            self.sort_orders()
 
         self.next_order_id += 1
 
-    def add_series(self, start_date, times, alist, until,repeat=timedelta(days=7)):
-        currDate = start_date
+    def add_series(self, sdate, times, alist, until,repeat=timedelta(days=7)):
+        currDate = sdate
         while currDate <= until:
             self.add_order(currDate, times, alist, self.next_series_id)
             currDate += repeat
-
-        self.sort()
+        
+        print(f"Series {self.next_series_id} successfully added!")
+        self.sort_orders()
         self.next_series_id += 1
 
-    def sort(self):
+    def sort_orders(self):
         self.orders.sort(key = lambda x: x.sort_key())
 
     def remove_order(self, order_id):
-        for order in self.orders:
-            if order.id == order_id:
-                self.orders.remove(order)
-                print("Order {} removed.".format(order_id))
-                return
-        print("Order {} not found".format(order_id))
+        order = self.get_order(order_id)
+
+        if order:
+            self.orders.remove(order)
+            print(f"Order {order_id} removed.")
     
     def remove_series(self, series_id):
-        ids = [o.id for o in self.orders if o.series == series_id]
-        if len(ids) == 0:
-            print("Series {} not found".format(series_id))
-            return
-        for _id in ids:
-            self.remove_order(_id)
-        print("Series {} removed.".format(series_id))
+        ids = self.get_series(series_id)
 
-    def modify_order(self):
-        pass
+        if ids:
+            for _id in ids:
+                self.remove_order(_id)
+            print(f"Series {series_id} removed.")
+
+    def modify_order(self, order_id, val, series = False):
+        order = self.get_order(order_id)
+
+        if not order:
+            return
+        
+        if type(val) == list:
+            order.areas = val
+            print(f"Order {order_id} workout areas successfully changed")
+
+        elif type(val) == TimeRangeList:
+            #create a copy of the order, modify and check for conflicts
+            mod_order = copy.deepcopy(order)
+            mod_order.times = val
+            
+            if self.conflicts_with(mod_order, excluding = order):
+                print("Requested time changes create conflicts, no changes made")
+                return
+            order = mod_order
+            print(f"Order {order_id} time ranges successfully changed")
+
+        elif type(val) == date:
+            mod_order = copy.deepcopy(order)
+            mod_order.date = val
+
+            if self.conflicts_with(mod_order, excluding = order):
+                print("Requested date change creates conflicts, no changes made")
+                return
+            order = mod_order
+            print(f"Order {order_id} date successfully changed")
+
+        else:
+            print("Invalid value type, no changes made")
+            return
+        
+        if not series:
+            self.sort_orders()
+        
+
+    def modify_series(self, series_id, val):
+        ids = self.get_series(series_id)
+
+        if ids:
+            for _id in ids:
+                self.modify_order(_id, val, True)
+            print(f"Series {series_id} modified.")
 
     def print_orders(self):
         print("ORDER LIST")
@@ -120,7 +189,7 @@ class TimeRange:
     def print_range(self):
         t1str = self.t1.strftime(self.format)
         t2str = self.t2.strftime(self.format)
-        print("{0} - {1}".format(t1str, t2str))
+        print(f"{t1str} - {t2str}")
 
 class TimeRangeList:
     def __init__(self, ranges=[]):
@@ -128,23 +197,30 @@ class TimeRangeList:
         self.sort_ranges()
         return
 
-    def print_ranges(self,prefix=""):
-        for tr in self.time_ranges:
+    def print_ranges(self,prefix="", numbered=False):
+        for i in range(len(self.time_ranges)):
             print(prefix, end="")
-            tr.print_range()
+            if numbered:
+                print(str(i+1) + '. ',end="")
+            self.time_ranges[i].print_range()
         return
 
     def delete_range(self, ndx):
-        del self.time_ranges[ndx]
+        try:
+            del self.time_ranges[ndx]
+            return True
+        except:
+            print("Invalid time range number, see above")
+            return False
 
     def add_range(self, new_range):
         for rng in self.time_ranges:
             if new_range.conflicts_with(rng):
                 print("New time range has conflicts and could not be added")
-                return
+                return False
         self.time_ranges.append(new_range)
         self.sort_ranges()
-        return
+        return True
     
     def sort_ranges(self):
         self.time_ranges.sort(key=lambda x: x.t1)
