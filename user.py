@@ -1,7 +1,9 @@
 import os
 import pickle
 from orders import OrderList, TimeRange, TimeRangeList
-from datetime import date, time, datetime
+import book_workout
+from datetime import date, time, datetime, timedelta
+import time as tm
 import copy
 
 class Session:
@@ -30,20 +32,53 @@ class Session:
         
         print("Starting program, type CTRL-Z to exit...")
         #start program here
-        '''
+        
+        
+        #make sure list is sorted
+        print("Removing expired orders:")
+        self.SeshUser.orders.remove_expired_orders()
+        self.save()
         while True:
-            #make sure list is sorted
-            remove_obselete orders()
-            not = get_next_order_time()
-            while not xmin before not:
-                hibernate
-            attempt_to_book()
+            next_order = self.SeshUser.orders.next_order()
+            next_ord_time = next_order.earliest_datetime()
+            #can book area exactly 3 days in advance, get to site a minute
+            #early
+            next_book_time = next_ord_time - timedelta(days=3,seconds=60)
+            diff = next_book_time - datetime.now()
+            timestr = "".join(str(diff).split(".")[:-1])
+            otimelen = 16 #max len of output time string?
+            timelen = otimelen
+            while diff.total_seconds() > 0:
+                #not time yet, need to wait
+
+                #show time remaining
+                print(f"\rHibernating for {timestr} until next booking can be "
+                        "made" + " "*(otimelen - timelen),end = "")
+
+                tm.sleep(1.0)
+                diff = next_book_time - datetime.now()
+                timestr = "".join(str(diff).split(".")[:-1])
+                timelen = len(timestr)
+            
+            print("Attempting to book next session...")
+            
+            success = book_workout.book_workout(self.SeshUser, next_order)
+            #attempt_to_book()
             #should refresh until desired time
             #then try and book in all areas
-            print(success/failure)
+            #print(success/failure)
+            #if success:
+            #    remove order from orderlist
             if success:
-                remove order from orderlist
-        '''
+                booked_id = next_order.id
+                print(f"Booked order {booked_id}")
+                self.SeshUser.orders.remove_order(booked_id)
+            else:
+                print("Failure")
+                break
+                
+                #TODO: booking failed, remove first time range
+                #if no time ranges, delete order and print statement
         return
 
     def edit(self):

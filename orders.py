@@ -30,9 +30,17 @@ class RequestedOrder:
                     return True
         return False
 
-    def sort_key(self):
+    def earliest_datetime(self):
         earliest_time = self.times.time_ranges[0].t1
         return datetime.combine(self.date, earliest_time)
+
+    def expired(self):
+        #checks whether order can possibly be completed at current time
+        latest_time = self.times.time_ranges[-1].t2
+        latest_dt = datetime.combine(self.date, latest_time)
+        latest_book_dt = latest_dt - timedelta(hours=1)
+        return datetime.now() >= latest_book_dt
+            
 
 
 class OrderList:
@@ -57,6 +65,9 @@ class OrderList:
                     continue
                 return True
         return False
+
+    def next_order(self):
+        return self.orders[0]
     
     def get_order(self, order_id):
         for order in self.orders:
@@ -103,7 +114,7 @@ class OrderList:
         return
 
     def sort_orders(self):
-        self.orders.sort(key = lambda x: x.sort_key())
+        self.orders.sort(key = lambda x: x.earliest_datetime())
         return
 
     def remove_order(self, order_id):
@@ -127,6 +138,19 @@ class OrderList:
             return True
 
         return False
+
+    def remove_expired_orders(self):
+        exp_orders = []
+        for order in self.orders:
+            if order.expired():
+                exp_orders.append(order.id)
+            else:
+                break
+        if len(exp_orders) == 0:
+            print("None found")
+        for _id in exp_orders:
+            self.remove_order(_id)
+        return
 
     def modify_order(self, order_id, val, series = False):
         order = self.get_order(order_id)
