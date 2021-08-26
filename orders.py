@@ -2,44 +2,45 @@ from datetime import date, time, datetime, timedelta
 import copy
 
 class RequestedOrder:
-        def __init__(self, date, times, alist, idn, series):
-            self.date = date
-            self.times = times
-            self.areas = alist
-            self.id = idn
-            self.series = series
+    def __init__(self, date, times, alist, idn, series):
+        self.date = date
+        self.times = times
+        self.areas = alist
+        self.id = idn
+        self.series = series
 
-        def print_details(self):
-            print(f"ORDER {self.id}",end="")
-            if self.series != None:
-                print(f" | Series {self.series}")
-            else:
-                print()
-            print(self.date.isoformat() + " | ",end="")
-            print("/".join(areas))
-            self.times.print_ranges(prefix="\t")
-            return
+    def print_details(self):
+        print(f"ORDER {self.id}",end="")
+        if self.series:
+            print(f" | Series {self.series}")
+        else:
+            print()
+        print(self.date.isoformat() + " | ",end="")
+        print("/".join(self.areas))
+        self.times.print_ranges(prefix="\t")
+        return
 
-        def conflicts_with(self, order2):
-            if self.date != order2.date:
-                return False
-            
-            for rng in self.times.time_ranges:
-                for rng2 in order2.times.time_ranges:
-                    if rng.conflicts_with(rng2):
-                        return True
+    def conflicts_with(self, order2):
+        if self.date != order2.date:
             return False
+        
+        for rng in self.times.time_ranges:
+            for rng2 in order2.times.time_ranges:
+                if rng.conflicts_with(rng2):
+                    return True
+        return False
 
-        def sort_key(self):
-            earliest_time = self.times.time_ranges[0].t1
-            return datetime.combine(self.date, earliest_time)
+    def sort_key(self):
+        earliest_time = self.times.time_ranges[0].t1
+        return datetime.combine(self.date, earliest_time)
 
 
 class OrderList:
     def __init__(self):
         self.orders = []
-        self.next_order_id = 0
-        self.next_series_id = 0
+        self.next_order_id = 1
+        self.next_series_id = 1
+        return
 
     def conflicts_with(self, order2, excluding = None):
         #below code cannot be performed when only sorting after modifying 
@@ -73,6 +74,7 @@ class OrderList:
 
     def add_order(self, date, times, alist, series = None):
         new_order = RequestedOrder(date, times, alist, self.next_order_id, series)
+        #print(date,times,alist,new_order.date,new_order.times)
         if self.conflicts_with(new_order):
             print("New order conflicts with existing one, could not be added.")
             print("New:")
@@ -81,12 +83,13 @@ class OrderList:
             order.print_details()
             return
         self.orders.append(new_order)
-        print(f"Order {series.next_order_id} successfully added!")
+        print(f"Order {self.next_order_id} successfully added!")
 
         if not series:
             self.sort_orders()
 
         self.next_order_id += 1
+        return
 
     def add_series(self, sdate, times, alist, until,repeat=timedelta(days=7)):
         currDate = sdate
@@ -97,9 +100,11 @@ class OrderList:
         print(f"Series {self.next_series_id} successfully added!")
         self.sort_orders()
         self.next_series_id += 1
+        return
 
     def sort_orders(self):
         self.orders.sort(key = lambda x: x.sort_key())
+        return
 
     def remove_order(self, order_id):
         order = self.get_order(order_id)
@@ -107,14 +112,21 @@ class OrderList:
         if order:
             self.orders.remove(order)
             print(f"Order {order_id} removed.")
+            return True
+        return False
     
     def remove_series(self, series_id):
         ids = self.get_series(series_id)
 
         if ids:
-            for _id in ids:
+            #keep first order, delete rest of series
+            self.get_order(ids[0]).series = None
+            for _id in ids[1:]:
                 self.remove_order(_id)
             print(f"Series {series_id} removed.")
+            return True
+
+        return False
 
     def modify_order(self, order_id, val, series = False):
         order = self.get_order(order_id)
@@ -134,7 +146,7 @@ class OrderList:
             if self.conflicts_with(mod_order, excluding = order):
                 print("Requested time changes create conflicts, no changes made")
                 return
-            order = mod_order
+            order.times = val
             print(f"Order {order_id} time ranges successfully changed")
 
         elif type(val) == date:
@@ -144,7 +156,7 @@ class OrderList:
             if self.conflicts_with(mod_order, excluding = order):
                 print("Requested date change creates conflicts, no changes made")
                 return
-            order = mod_order
+            order.date = val
             print(f"Order {order_id} date successfully changed")
 
         else:
@@ -153,21 +165,27 @@ class OrderList:
         
         if not series:
             self.sort_orders()
+        return
         
 
     def modify_series(self, series_id, val):
+        if type(val) == date:
+            print("Cannot modify series dates, no changes made")
+            return
         ids = self.get_series(series_id)
 
         if ids:
             for _id in ids:
                 self.modify_order(_id, val, True)
             print(f"Series {series_id} modified.")
+            self.sort_orders()
+        return
 
     def print_orders(self):
         print("ORDER LIST")
         for order in self.orders:
-            print('\n')
             order.print_details()
+        return
 
     
 class TimeRange:
@@ -179,6 +197,7 @@ class TimeRange:
         self.t1 = t1
         self.t2 = t2
         self.format = frmt
+        return
 
     def conflicts_with(self, TR2):
         if ((self.t2 >= TR2.t1 and self.t2 <= TR2.t2) 
@@ -190,6 +209,7 @@ class TimeRange:
         t1str = self.t1.strftime(self.format)
         t2str = self.t2.strftime(self.format)
         print(f"{t1str} - {t2str}")
+        return
 
 class TimeRangeList:
     def __init__(self, ranges=[]):
@@ -198,20 +218,26 @@ class TimeRangeList:
         return
 
     def print_ranges(self,prefix="", numbered=False):
+        if len(self.time_ranges) == 0:
+            print(prefix+'None\n')
+            return
         for i in range(len(self.time_ranges)):
             print(prefix, end="")
             if numbered:
                 print(str(i+1) + '. ',end="")
             self.time_ranges[i].print_range()
+        print()
         return
 
     def delete_range(self, ndx):
         try:
+            if ndx < 0:
+                raise ValueError
             del self.time_ranges[ndx]
             return True
         except:
             print("Invalid time range number, see above")
-            return False
+        return False
 
     def add_range(self, new_range):
         for rng in self.time_ranges:

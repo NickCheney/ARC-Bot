@@ -2,6 +2,7 @@ import os
 import pickle
 from orders import OrderList, TimeRange, TimeRangeList
 from datetime import date, time, datetime
+import copy
 
 class Session:
     def __init__(self):
@@ -18,7 +19,7 @@ class Session:
                 user = pickle.load(f)
             #self.SeshUser = User(udata)
             self.SeshUser = user
-            print("Welcome, {}.".format(self.SeshUser.name))
+            print(f"Welcome, {self.SeshUser.name}.\n")
         return
 
     def start(self):
@@ -67,11 +68,11 @@ class User:
         
         self.name = input("Name: ")
         
-        gend = "none"
-        while gend[0].lower() != 'm' and gend[0].lower() != 'f':
+        gend = None
+        while not gend or gend not in 'mf':
             gend = input("Gender (for Women's Fitness Zone exclusion) "
-                    "[male/female]: ")
-        if gend[0].lower() == 'm':
+                    "[male/female]: ")[0].lower()
+        if gend == 'm':
             self.gender = "male"
         else:
             self.gender = "female"
@@ -84,25 +85,25 @@ class User:
         get_ord = input("Add orders [y/n]?: ")
         if get_ord[0].lower() == 'y':
             self.edit_orders()
-        print("Setup successful!")
+        print("Setup successful!\n")
         return
 
     def edit_orders(self):
         print("\nSTARTING ORDER EDITOR\n")
-        inp = "none"
-        while inp[0].lower() != 'q':
-            inp = input("Choose an order option [add/delete/modify/quit]: ")
-            if inp.lower()[0] == 'a':
+        inp = None
+        while not inp or inp in "adm":
+            inp = input("Choose an order option [add/delete/modify/quit]: ")[0].lower()
+            if inp == 'a':
                 self.add_order()
-            elif inp.lower()[0] == 'd':
+            elif inp == 'd':
                 self.delete_order()
-            elif inp.lower()[0] == 'm':
+            elif inp == 'm':
                 self.modify_order()
 
         print("\nCLOSING EDITOR\n")
         return
 
-    def add_time(times):
+    def add_time(self,times):
         added = False
         while not added:
             try:
@@ -110,11 +111,11 @@ class User:
                 t1, t2 = trangestr.split(' - ')
                 added = times.add_range(TimeRange(t1, t2))
             except:
-                print('Please enter a valid time range "
-                        "(e.g. "9:00 AM - 12:00 PM")')
+                print('Please enter a valid time range '
+                        '(e.g. "9:00 AM - 12:00 PM")')
         return
 
-    def remove_time(times):
+    def remove_time(self,times):
         if len(times.time_ranges) == 0:
             print("No time ranges to remove!")
             return
@@ -128,55 +129,87 @@ class User:
                 print("Please enter a valid time range number")
         return
 
-    def edit_times(times):
+    def edit_times(self,times):
+        if len(times.time_ranges) == 0:
+            self.add_time(times)
         action = None
-        while not action or action not in "ra":
-            print("\n Current time ranges:")
+        while not action or action in "ra":
+            print("\nCurrent time ranges:")
             times.print_ranges(prefix='\t',numbered=True)
             
-            action = input("Select action [add/remove/quit]: ")[0].lower()
+            action = input("Select time range action [add/remove/quit]: ")[0].lower()
             if action == 'a':
                 self.add_time(times)
             elif action == 'r':
                 self.remove_time(times)
+            else:
+                if len(times.time_ranges) == 0:
+                    print("Add at least one time range to quit.")
+                    action = None
         return
     
-    def add_area(areas):      
+    def add_area(self,areas):      
         area = input("Enter name of workout area or a search term: ")
+        if len(areas) == 0:
+            areas.append(area)
+            return
         place = None
         while not place:
             place = input("Priority [first/last/<n>]: ").strip(" .")
             if place[0].lower() == "f":
-                place = 0
+                place = 1
             elif place[0].lower() == "l":
-                place = len(areas)
+                place = len(areas) + 1
             else:
                 try:
                     place = int(place)
-                    if place < 0:
-                        place = 0
-                    elif place > len(areas):
-                        place = len(areas)
+                    if place < 1:
+                        place = 1
+                    elif place > len(areas) + 1:
+                        place = len(areas) + 1
                 except:
-                    print('Enter a valid priority (e.g. "first", "last", 3)')
+                    print('Enter a valid priority (e.g. "first", "last", "3")')
                     place = None
-        areas.insert(place, area)
+        areas.insert(place - 1, area)
         return
 
-    def edit_areas(areas):
+    def remove_area(self,areas):
+        if len(areas) == 0:
+            print("No areas to remove!")
+            return
+        
+        removed = False
+        while not removed:
+            try:
+                n = int(input("Priority number of area to remove: "))
+                if n < 1:
+                    raise ValueError
+                del areas[n-1]
+                removed = True
+            except:
+                print("Please enter a valid area priority number from above")
+        return
+
+    def edit_areas(self,areas):
+        if len(areas) == 0:
+            self.add_area(areas)
         action = None
-        while not action or action not in "ra":
-            print("\n Current workout area search terms (in order):")
+        while not action or action in "ra":
+            print("\nCurrent workout area search terms (in order):")
             for i in range(len(areas)):
-                print(f"\t{i}. {areas[i]}")
+                print(f"\t{i+1}. {areas[i]}")
             
-            action = input("Select action [add/remove/quit]: ")[0].lower()
+            action = input("Select area list action [add/remove/quit]: ")[0].lower()
             if action == 'a':
                 self.add_area(areas)
             elif action == 'r':
                 self.remove_area(areas)
+            elif len(areas) == 0:
+                print("Add at least one area to quit.")
+                action = None
+        return
 
-    def get_date():
+    def get_date(self):
         odate = False
         while not odate:
             try:
@@ -190,14 +223,19 @@ class User:
 
     def add_order(self):
         print("\nAdding a new order")
-
+        
         odate = self.get_date()
-        otimes = self.get_times()
-        oalist = self.get_areas()
+        otimes = TimeRangeList()
+        self.edit_times(otimes)
+        oalist = []
+        self.edit_areas(oalist)
+
+        #print(odate,otimes,oalist)
         
         sconf = input("Create weekly series from order [y/n]?: ")
         if sconf[0].lower() == 'y':
-            #create recurring weekly series (add option to adjust interval later)
+            #create recurring weekly series 
+            #TODO: add option to adjust interval later
             s_end = False
             while not s_end:
                 try:
@@ -213,57 +251,77 @@ class User:
         return
         
     def delete_order(self):
+        if len(self.orders.orders) == 0:
+            print("No orders to delete!")
+            return
         ntype = "Order"
         self.orders.print_orders()
         do_series = input("Delete a series or single order [series/order]?: ")
         series = do_series[0].lower() == 's'
         if series:
             ntype = "Series"
-        num = False
-        while not num:
+
+        deleted = False
+        while not deleted:
             try:
-                nstr = input("{} number to delete: ".format(ntype))
+                nstr = input(f"{ntype} number to delete: ")
                 num = int(nstr)
+                if series:
+                    deleted = self.orders.remove_series(num)
+                else:
+                    deleted = self.orders.remove_order(num)
             except:
-                print("Please enter a valid {} number from above".format(ntype))
-        if series:
-            self.orders.remove_series(num)
-        else:
-            self.orders.remove_order(num)
+                print(f"Please enter a valid {ntype} number from above")
+        return
         
     def modify_order(self):
+        if len(self.orders.orders) == 0:
+            print("No orders to modify!")
+            return
         self.orders.print_orders()
-        do_series = input("Modify a series or single order [series/order]?: ")
-        series = do_series[0].lower() == 's'
-        if series:
-            ntype = "Series"
-        else:
-            ntype = "Order"
-        num = False
-        while not num:
+        order = False
+        while not order:
             try:
-                nstr = input("{} number to delete: ".format(ntype))
-                num = int(nstr)
+                oid = int(input("Order number to modify: "))
+                order = self.orders.get_order(oid)
             except:
-                print("Please enter a valid {} number from above".format(ntype))
+                print(f"Please enter a valid order number from above")
+        
+        do_series = False
+        if order.series:
+            resp = input("Modify entire series or just this order "
+                    "[series/order]?: ")
+            do_series = resp[0].lower() == 's'
+
+        if do_series:
+            opts = "ta"
+            options = "[times/areas]"
+        else:
+            opts = "dta"
+            options = "[date/times/areas]"
 
         #get the value to modify here
         mtype = None
-        while not mtype or mtype not in 'dta':
-            mtype = input("Modify what [date/times/areas]?: ")[0].lower()
+        while not mtype or mtype not in opts: 
+            mtype = input(f"Modify what {options}?: ")[0].lower()
 
         if mtype == 'a':
-            pass
-        elif mtype == 'd':
-            pass
-        else:
-            pass
+            #modify copy then see if it works with order list 
+            val = copy.deepcopy(order.areas)
+            self.edit_areas(val)
 
-        if series:
-            self.orders.modify_series(num, val = None)
+        elif mtype == 't':
+            val = copy.deepcopy(order.times)
+            self.edit_times(val)
+
         else:
-            self.orders.modify_order(num, val = None)
-        self.orders.print_orders()
+            val = self.get_date()
+
+        if do_series:
+            self.orders.modify_series(order.series, val)
+        else:
+            self.orders.modify_order(oid, val)
+        return
 
     #def get_data(self):
     #    return vars(self)
