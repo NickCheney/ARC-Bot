@@ -1,0 +1,7 @@
+beautifulsoup4==4.9.3
+bs4==0.0.1
+EasyProcess==0.3
+PyVirtualDisplay==2.2
+selenium==3.141.0
+soupsieve==2.2.1
+urllib3==1.26.6

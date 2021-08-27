@@ -25,20 +25,19 @@ class Session:
         return
 
     def start(self):
-        if len(self.SeshUser.orders.orders) == 0:
-            print("You don't have any orders! Add one or more to get started")
-            self.edit()
-            return
         
         print("Starting program, type CTRL-Z to exit...")
-        #start program here
-        
+        #start program here 
         
         #make sure list is sorted
         print("Removing expired orders:")
         self.SeshUser.orders.remove_expired_orders()
         self.save()
         while True:
+            if len(self.SeshUser.orders.orders) == 0:
+                print("No more orders! Add one or more to continue")
+                self.edit()
+                return
             next_order = self.SeshUser.orders.next_order()
             next_ord_time = next_order.earliest_datetime()
             #can book area exactly 3 days in advance, get to site a minute
@@ -50,7 +49,6 @@ class Session:
             timelen = otimelen
             while diff.total_seconds() > 0:
                 #not time yet, need to wait
-
                 #show time remaining
                 print(f"\rHibernating for {timestr} until next booking can be "
                         "made" + " "*(otimelen - timelen),end = "")
@@ -63,12 +61,7 @@ class Session:
             print("Attempting to book next session...")
             
             success = book_workout.book_workout(self.SeshUser, next_order)
-            #attempt_to_book()
-            #should refresh until desired time
-            #then try and book in all areas
-            #print(success/failure)
-            #if success:
-            #    remove order from orderlist
+            
             if success:
                 booked_id = next_order.id
                 print(f"Booked order {booked_id}")
@@ -76,9 +69,6 @@ class Session:
             else:
                 print("Failure")
                 break
-                
-                #TODO: booking failed, remove first time range
-                #if no time ranges, delete order and print statement
         return
 
     def edit(self):
@@ -270,7 +260,6 @@ class User:
         sconf = input("Create weekly series from order [y/n]?: ")
         if sconf[0].lower() == 'y':
             #create recurring weekly series 
-            #TODO: add option to adjust interval later
             s_end = False
             while not s_end:
                 try:
@@ -358,5 +347,3 @@ class User:
             self.orders.modify_order(oid, val)
         return
 
-    #def get_data(self):
-    #    return vars(self)

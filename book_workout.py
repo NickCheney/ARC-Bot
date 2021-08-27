@@ -4,16 +4,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
+from pyvirtualdisplay import Display
 import time as tm, datetime as dt
 from datetime import date, time, datetime, timedelta
 import traceback
 import os
-from dotenv import load_dotenv
-
-
-#USERNAME = os.environ.get("USERNAME")
-
-#PASSWORD = os.environ.get("PASSWORD")
 
 def str_to_date(date):
     return datetime.strptime(date, "%A, %B %d, %Y").date()
@@ -26,19 +21,7 @@ def in_timerange(min_start, max_end, s_start, s_end):
         return True
     return False
     
-
 def book_workout(user, order):
-    #load_dotenv()
-
-    #DRIVER_PATH=os.environ.get("DRIVER_PATH")
-
-    #set driver options
-    CHROME_OPTIONS = webdriver.chrome.options.Options()
-    '''Add to prevent graphical browser display'''
-    CHROME_OPTIONS.add_argument("--headless")
-    CHROME_OPTIONS.add_argument("--window-size=1500,1000")
-
-    #BASE_URL = os.environ.get("https://getactive.gogaelsgo.com")
     #TODO: use gender flag instead of exclusions or let user set exclusions
     BASE_URL = "https://getactive.gogaelsgo.com"
     username = user.netid
@@ -51,8 +34,9 @@ def book_workout(user, order):
     times = order.times.time_ranges
 
     try:
-        driver = webdriver.Chrome(options = CHROME_OPTIONS)
-        #driver = webdriver.Chrome()
+        display = Display(visible=0,size=(1500,1000))
+        display.start()
+        driver = webdriver.Chrome()
         #get first page
         driver.get(BASE_URL)
         #accept cookies
@@ -80,7 +64,7 @@ def book_workout(user, order):
             t = t.lower()
             tprograms = [p for p in programs if (t in p.text.lower()) and not any([e in p.text.lower() for e in excluding])]
             tpaths = [p.attrs['onclick'] for p in tprograms]
-            turls = [BASE_URL  + l[l.index("'")+1:len(l)-1] for l in tpaths]
+            turls = [BASE_URL + l[l.index("'")+1:len(l)-1] for l in tpaths]
             for url in turls:
                 #check new area
                 driver.get(url)
@@ -89,7 +73,7 @@ def book_workout(user, order):
                 print(f"Checking {area_title}")
 
                 #attempt to make reservation within required timeframe on correct date
-                timeslots = driver.find_elements_by_xpath('//*[@id="mainContent"]/div[2]/b/b/section/div')
+                timeslots = driver.find_elements_by_xpath('//*[@id="mainContent"]/div[2]/section/div')
                 #tm.sleep(5.0)
                 #print(timeslots)
                 for slot in timeslots:
@@ -104,8 +88,8 @@ def book_workout(user, order):
                         #print("found slot on required date!")
                         period, availability = slot.find_element_by_xpath(".//div/div/div/small").text.split('\n')
                         for avper in times:
-                            avper.print_range()
-                            print(period)
+                            #avper.print_range()
+                            #print(period)
                             if in_timerange(avper.t1,avper.t2, *period.split(' - ')):
                                 #print("found slot in correct time range!")
                                 if availability != "No Spots Available":
@@ -128,12 +112,14 @@ def book_workout(user, order):
                                     #driver.find_element_by_xpath('//*[@id="ExistingCardsModal"]/div/div/div[2]/div/div[2]/button').click()
                                     print('Success!')
                                     driver.quit()
+                                    display.stop()
                                     return True
                 driver.back()
             
     except Exception as e:
-        print("Error in session!")
+        print("Error during booking session!")
         traceback.print_exc()
     
     driver.quit()
+    display.stop()
     return False
