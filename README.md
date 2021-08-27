@@ -5,11 +5,19 @@ Automated Gym Session Booking for Queen's University Athletics and Recreation Ce
 ### **Linux**
 ### **Windows**
 ## Usage
-The program is currently implemented as a text-based terminal tool, with the potential for a GUI based application in the future.
-
-Start with: `python main.py`
+The program is currently implemented as a text-based terminal tool, with the potential for a GUI based application in the future. Prompt options are given in brackets and can be selected with the full option name or the first character:
+```
+select option [first/second]: f
+first option selected!
+```
+Start the program with: `python main.py`
 You will be prompted to enter user information and can choose to add inital orders or not:
 ```
 Local user data not found, please provide the following (data will only be stored locally):
-Name: \*Nick\*
+Name: Nick
+Gender (for Women's Fitness Zone exclusion) [male/female]: m
+Queen's NetID: 12ABC3
+Current NetID password: 123password
+Add orders [y/n]?: n
+Setup successful!
 ```
