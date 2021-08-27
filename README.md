@@ -5,3 +5,5 @@ Automated Gym Session Booking for Queen's University Athletics and Recreation Ce
 ### **Linux**
 ### **Windows**
 ## Usage
+The program is currently implemented as a text-based terminal tool, with the potential for a GUI based application in the future.
+Start with: <python main.py>
