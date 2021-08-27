@@ -7,11 +7,15 @@ import time as tm
 import copy
 
 class Session:
-    def __init__(self):
+    def __init__(self,auto=False):
         self.data_folder = "./data/"
         self.user_data_file = self.data_folder + "udata.pickle"
-
+        
         if not os.path.isfile(self.user_data_file):
+            if auto:
+                print("No user profile, cannot start automatically")
+                self.SeshUser = None
+                return
             if not os.path.exists(self.data_folder):
                 os.mkdir(self.data_folder)
             self.SeshUser = User()
@@ -35,8 +39,8 @@ class Session:
         self.save()
         while True:
             if len(self.SeshUser.orders.orders) == 0:
-                print("No more orders! Add one or more to continue")
-                self.edit()
+                print("No more orders! Add one or more under 'edit'"
+                        " option to start")
                 return
             next_order = self.SeshUser.orders.next_order()
             next_ord_time = next_order.earliest_datetime()
