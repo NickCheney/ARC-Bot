@@ -12,12 +12,10 @@ class RequestedOrder:
     def print_details(self):
         print(f"ORDER {self.id}",end="")
         if self.series:
-            print(f" | Series {self.series}")
-        else:
-            print()
-        print(self.date.isoformat() + " | ",end="")
-        print("/".join(self.areas))
-        self.times.print_ranges(prefix="\t")
+            print(f" | Series {self.series}",end="")
+        print(f" | {self.date.isoformat()} | ",end="") 
+        print(" / ".join(self.areas) + " | ",end="")
+        self.times.print_ranges(sep=" / ")
         return
 
     def conflicts_with(self, order2):
@@ -206,9 +204,10 @@ class OrderList:
         return
 
     def print_orders(self):
-        print("ORDER LIST")
+        print("\nORDER LIST\n")
         for order in self.orders:
             order.print_details()
+        print()
         return
 
     
@@ -229,11 +228,10 @@ class TimeRange:
             return True
         return False
     
-    def print_range(self):
+    def to_str(self):
         t1str = self.t1.strftime(self.format)
         t2str = self.t2.strftime(self.format)
-        print(f"{t1str} - {t2str}")
-        return
+        return f"{t1str} - {t2str}"
 
 class TimeRangeList:
     def __init__(self):
@@ -241,16 +239,18 @@ class TimeRangeList:
         self.sort_ranges()
         return
 
-    def print_ranges(self,prefix="", numbered=False):
+    def print_ranges(self, prefix="", sep = "\n", numbered=False):
         if len(self.time_ranges) == 0:
-            print(prefix+'None\n')
+            print(prefix+'None')
             return
-        for i in range(len(self.time_ranges)):
-            print(prefix, end="")
-            if numbered:
-                print(str(i+1) + '. ',end="")
-            self.time_ranges[i].print_range()
-        print()
+
+        rangestrs = [r.to_str() for r in self.time_ranges]
+        if numbered:
+            rangestrs = [f"{i+1}. " + rangestrs[i] for i in range(len(rangestrs))]
+
+        rangestrs = [prefix + r for r in rangestrs]
+        outstr = sep.join(rangestrs)
+        print(outstr)
         return
 
     def delete_range(self, ndx):

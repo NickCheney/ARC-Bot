@@ -55,9 +55,12 @@ def book_workout(user, order):
         programs = [s('div')[0] for s in soup.find(id='list-group').find_all('div',recursive=False)]
         
         #wait here until the correct time
-        while datetime.now() < order.earliest_datetime() - timedelta(days=3):
+        book_time = order.earliest_datetime() - timedelta(days=3)
+        while datetime.now() < book_time:
+            tdelt = (book_time - datetime.now()).total_seconds()
+            print(f"\rOn main page, waiting {str(tdelt).split('.')[0]}s to book ",end="")
             tm.sleep(1.0)
-            print("on main page, waiting...")
+        print()
 
         for t in reserve_types:
             print(f"Trying {t} as search term")

@@ -58,16 +58,16 @@ class Session:
                 timestr = "".join(str(diff).split(".")[:-1])
                 timelen = len(timestr)
             
-            print("Attempting to book next session...")
+            print("\nAttempting to book next session...")
             
             success = book_workout.book_workout(self.SeshUser, next_order)
             
             if success:
-                booked_id = next_order.id
-                print(f"Booked order {booked_id}")
-                self.SeshUser.orders.remove_order(booked_id)
+                print(f"Booked order {next_order.id}")
+                self.SeshUser.orders.remove_order(next_order.id)
             else:
-                print("Failure")
+                print(f"Failed to book order {next_order.id}")
+
                 break
         return
 
@@ -82,7 +82,6 @@ class Session:
 
     def save(self):
         with open(self.user_data_file, 'wb') as f:
-            #pickle.dump(self.SeshUser.get_data(), f)
             pickle.dump(self.SeshUser, f)
         return
 
