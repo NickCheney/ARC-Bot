@@ -21,10 +21,7 @@ Current NetID password: 123password
 Add orders [y/n]?: n
 Setup successful!
 ```
-You will then reach the main menu from where you can start the program, edit (add/remove/modify) your orders, view your orders or quit:
-```Select an option [start/edit/view/quit]:```
-This will be the default entry point after your first usage.
-Once you have added at least one order, the program can be started:
+You will then reach the main menu from where you can start the program, edit (add/remove/modify) your orders, view your orders or quit. This will be the default entry point after your first usage. Once you have added at least one order, the program can be started:
 ```
 Select an option [start/edit/view/quit]: s
 Starting program, type CTRL-Z to exit...
