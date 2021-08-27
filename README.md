@@ -1,7 +1,7 @@
 # ARC-Bot
 Automated Gym Session Booking for Queen's University Athletics and Recreation Centre (ARC). Uses Selenium to interact with the reservation website https://getactive.gogaelsgo.com/ and schedule the user's requested gym sessions when available. 
 
-All reservations are currently categorized by the gym area name and equipment available, together know as the category (e.g. "LL1 Lifting Zone - Squat Racks", "L2 Cardio Zone 1 - Treadmills"). Gym sessions are currently 1 hour in length and can be booked starting exactly 3 days prior.
+All reservations are currently categorized by the gym area name and equipment available, together know as the category (e.g. *"LL1 Lifting Zone - Squat Racks"*, *"L2 Cardio Zone 1 - Treadmills"*). Gym sessions are currently 1 hour in length and can be booked starting exactly 3 days prior.
 
 ## Installation
 ### **Linux**
