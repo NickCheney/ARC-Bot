@@ -34,18 +34,19 @@ def book_workout(user, order):
 
     #set driver options
     CHROME_OPTIONS = webdriver.chrome.options.Options()
-    '''Add to prevent graphical browswer display'''
+    '''Add to prevent graphical browser display'''
     CHROME_OPTIONS.add_argument("--headless")
     CHROME_OPTIONS.add_argument("--window-size=1500,1000")
 
     #BASE_URL = os.environ.get("https://getactive.gogaelsgo.com")
+    #TODO: use gender flag instead of exclusions or let user set exclusions
     BASE_URL = "https://getactive.gogaelsgo.com"
     username = user.netid
     password = user.password
     reserve_types = order.areas
     excluding = []
     if user.gender == 'male':
-        excluding.append("Women's Fitness Zone")
+        excluding.append("women's fitness zone")
     req_date = order.date
     times = order.times.time_ranges
 
@@ -75,8 +76,9 @@ def book_workout(user, order):
             print("on main page, waiting...")
 
         for t in reserve_types:
-            print(f"Trying {t} as area")
-            tprograms = [p for p in programs if (t in p.text) and not any([e in p.text for e in excluding])]
+            print(f"Trying {t} as search term")
+            t = t.lower()
+            tprograms = [p for p in programs if (t in p.text.lower()) and not any([e in p.text.lower() for e in excluding])]
             tpaths = [p.attrs['onclick'] for p in tprograms]
             turls = [BASE_URL  + l[l.index("'")+1:len(l)-1] for l in tpaths]
             for url in turls:
@@ -84,7 +86,7 @@ def book_workout(user, order):
                 driver.get(url)
 
                 area_title = driver.find_element_by_xpath('//*[@id="mainContent"]/div[2]/nav/ol/li[2]').text
-                print(area_title)
+                print(f"Checking {area_title}")
 
                 #attempt to make reservation within required timeframe on correct date
                 timeslots = driver.find_elements_by_xpath('//*[@id="mainContent"]/div[2]/b/b/section/div')
@@ -96,16 +98,16 @@ def book_workout(user, order):
 
                     #past the desired date for area
                     if slot_date > req_date:
-                        print("No {0} sessions on {1} in required timeframe".format(area_title, req_date))
+                        print("No applicable sessions")
                         break
                     elif slot_date == req_date:
-                        print("found slot on required date!")
+                        #print("found slot on required date!")
                         period, availability = slot.find_element_by_xpath(".//div/div/div/small").text.split('\n')
                         for avper in times:
                             avper.print_range()
                             print(period)
                             if in_timerange(avper.t1,avper.t2, *period.split(' - ')):
-                                print("slot in correct time range!")
+                                #print("found slot in correct time range!")
                                 if availability != "No Spots Available":
                                     print("Attempting to register for",area_title,"from",period)
                                     slot.find_element_by_xpath(".//div/div/div[2]/button").click()
@@ -127,14 +129,10 @@ def book_workout(user, order):
                                     print('Success!')
                                     driver.quit()
                                     return True
-                            else:
-                                print("Range doesnt match...")
-                    else:
-                        print("Need a later date")
                 driver.back()
             
     except Exception as e:
-        print("Error!")
+        print("Error in session!")
         traceback.print_exc()
     
     driver.quit()

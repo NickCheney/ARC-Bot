@@ -236,8 +236,8 @@ class TimeRange:
         return
 
 class TimeRangeList:
-    def __init__(self, ranges=[]):
-        self.time_ranges = ranges
+    def __init__(self):
+        self.time_ranges = []
         self.sort_ranges()
         return
 
