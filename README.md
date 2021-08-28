@@ -16,6 +16,7 @@ first option selected!
 Start the program with: `python main.py`
 You will be prompted to enter user information and can choose to add inital orders or not:
 ```
+$python main.py
 Local user data not found, please provide the following (data will only be stored locally):
 Name: Nick
 Gender (for Women's Fitness Zone exclusion) [male/female]: m
