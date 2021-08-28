@@ -12,9 +12,11 @@ The program is currently implemented as a text-based terminal tool, with the pot
 select option [first/second]: f
 first option selected!
 ```
+### Standard
 Start the program with: `python main.py`
 You will be prompted to enter user information and can choose to add inital orders or not:
 ```
+$python main.py
 Local user data not found, please provide the following (data will only be stored locally):
 Name: Nick
 Gender (for Women's Fitness Zone exclusion) [male/female]: m
@@ -27,4 +29,20 @@ You will then reach the main menu from where you can start the program, edit (ad
 ```
 Select an option [start/edit/view/quit]: s
 Starting program, type CTRL-Z to exit...
+```
+### Automatic
+After inital user setup, the program can be automatically started without need for user interaction using the `-s` or `--start` arguments and will run until no orders remain:
+```
+$python main.py -s
+Welcome, Nick
+
+Starting program, type CTRL-Z to exit...
+Removing expired orders:
+None found
+Hibernating for 17:46:46 until next booking can be made
+```
+The following line can be used to run the program in the background in linux without terminal output (add `nohup` if accessing remotely):
+```
+$python main.py -s > log.txt &
+$
 ```
