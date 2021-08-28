@@ -25,7 +25,7 @@ def in_timerange(min_start, max_end, s_start, s_end):
 def book_workout(user, order):
     #TODO: use gender flag instead of exclusions or let user set exclusions
     BASE_URL = "https://getactive.gogaelsgo.com"
-    username = user.netid
+    username = user.username
     password = user.password
     reserve_types = order.areas
     excluding = []

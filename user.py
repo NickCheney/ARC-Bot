@@ -74,11 +74,27 @@ class Session:
             else:
                 print(f"Failed to book order {next_order.id}")
                 #try to push back order's first time range to next "quarter"
+                pushed_range = next_order.times.push_range(0)
+                if pushed_range:
+                    print("Pushing up order start time and retrying")
+                    continue
+                
+                #pushing range failed, so delete it
+                next_order.times.delete_range(0)
+                #check if any ranges left
+                if len(next_order.times.time_ranges) == 0:
+                    #order can't be completed, so delete
+                    print(f"Could not book order {next_order.id}, removing")
+                    self.SeshUser.orders.remove_order(next_order.id)
+                    #order removed so no sorting required
+                else:
+                    #range is gone, resort orders and try again
+                    self.SeshUser.orders.sort_orders()
 
         return
 
     def edit(self):
-        self.SeshUser.edit_orders()
+        self.SeshUser.edit()
         self.save()
         return
 
@@ -98,14 +114,7 @@ class User:
         
         self.name = input("Name: ")
         
-        gend = None
-        while not gend or gend not in 'mf':
-            gend = input("Gender (for Women's Fitness Zone exclusion) "
-                    "[male/female]: ")[0].lower()
-        if gend == 'm':
-            self.gender = "male"
-        else:
-            self.gender = "female"
+        self.gender = self.get_gender()
 
         self.netid = input("Queen's NetID: ")
         
@@ -116,6 +125,39 @@ class User:
         if get_ord[0].lower() == 'y':
             self.edit_orders()
         print("Setup successful!\n")
+        return
+
+    def get_gender(self):
+        gend = None
+        while not gend and gend not in 'mf':
+            gend = input("Gender (for Women's Fitness Zone exclusion)"
+                    " [male/female]: ")[0].lower()
+        if gend == 'm':
+            return "male"
+        return "female"
+    
+    def edit(self):
+        what = None
+        while not what and what not in "uo":
+            what = input("Edit what [user/orders]?: ")[0].lower()
+        if what == 'o':
+            self.edit_orders()
+        else:
+            self.edit_info()
+        return
+
+    def edit_info(self):
+        field = None
+        while not field and field not in "ngup":
+            field = input("Edit what [name/gender/username/password]: ")[0].lower()
+        if field == 'n':
+            self.name = input("Name: ")
+        elif field == 'g':
+            self.gender = self.get_gender()
+        elif field == 'u':
+            self.username = input("Queen's NetID: ")
+        else:
+            self.password = input("Current NetID password: ")
         return
 
     def edit_orders(self):

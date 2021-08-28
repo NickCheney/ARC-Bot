@@ -43,6 +43,21 @@ class TimeRangeList:
         print(outstr)
         return
 
+    def push_range(self, ndx):
+        #pushes range start to next "quarter", e.g. 10:07 -> 10:15
+
+        try:
+            rng = self.time_ranges[ndx]
+        except:
+            print("Invalid time range index")
+        to_add = 15 - rng.t1.minutes % 15
+        new_start = rng.t1 + timedelta(minutes=to_add)
+        if rng.t2 - new_start < timdelta(hours=1):
+            #can't push, period too short
+            return False
+        rng.t1 = new_start
+        return True
+
     def delete_range(self, ndx):
         try:
             if ndx < 0:
