@@ -1,6 +1,8 @@
 import os
+import sys
 import pickle
-from orders import OrderList, TimeRange, TimeRangeList
+from orders import OrderList
+from time_ranges import TimeRange, TimeRangeList
 import book_workout
 from datetime import date, time, datetime, timedelta
 import time as tm
@@ -56,7 +58,7 @@ class Session:
                 #show time remaining
                 print(f"\rHibernating for {timestr} until next booking can be "
                         "made" + " "*(otimelen - timelen),end = "")
-
+                sys.stdout.flush()
                 tm.sleep(1.0)
                 diff = next_book_time - datetime.now()
                 timestr = "".join(str(diff).split(".")[:-1])
@@ -71,8 +73,8 @@ class Session:
                 self.SeshUser.orders.remove_order(next_order.id)
             else:
                 print(f"Failed to book order {next_order.id}")
+                #try to push back order's first time range to next "quarter"
 
-                break
         return
 
     def edit(self):

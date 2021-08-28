@@ -9,6 +9,7 @@ import time as tm, datetime as dt
 from datetime import date, time, datetime, timedelta
 import traceback
 import os
+import sys
 
 def str_to_date(date):
     return datetime.strptime(date, "%A, %B %d, %Y").date()
@@ -59,6 +60,7 @@ def book_workout(user, order):
         while datetime.now() < book_time:
             tdelt = (book_time - datetime.now()).total_seconds()
             print(f"\rOn main page, waiting {str(tdelt).split('.')[0]}s to book ",end="")
+            sys.stdout.flush()
             tm.sleep(1.0)
         print()
 
