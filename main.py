@@ -13,18 +13,19 @@ def main():
             session.start()
         return
     session = Session()
-
-    action = 's'
-    while action[0].lower() != 'q':
-        action = input("Select an option [start/edit/view/quit]: ")
-        if action[0].lower() == 's':
+    user = session.SeshUser
+    opts = ["start","edit","view","quit"]
+    action = True
+    while action:
+        action = user.input("Select an option",opts,True)
+        if action == 's':
             session.start()
-        elif action[0].lower() == 'e':
+        elif action == 'e':
             session.edit()
-        elif action[0].lower() == 'v':
+        elif action == 'v':
             session.view()
         
-    print("Saving data and exiting")
+    print("Saving and exiting")
     session.save()
 
     return

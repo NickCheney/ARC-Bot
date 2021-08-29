@@ -112,34 +112,54 @@ class User:
         print("Local user data not found, please provide the following "
                 "(data will only be stored locally):")
         
-        self.name = input("Name: ")
+        self.name = self.input("Name",quit=False)
         
         self.gender = self.get_gender()
 
-        self.netid = input("Queen's NetID: ")
+        self.netid = self.input("Queen's NetID",quit=False)
         
-        self.password = input("Current NetID password: ")
+        self.password = self.input("Current NetID password",quit=False)
         
         self.orders = OrderList()
-        get_ord = input("Add orders [y/n]?: ")
-        if get_ord[0].lower() == 'y':
+        get_ord = self.input("Add orders?",['y','n'],False)
+        if get_ord == 'y':
             self.edit_orders()
         print("Setup successful!\n")
         return
 
     def get_gender(self):
-        gend = None
-        while not gend and gend not in 'mf':
-            gend = input("Gender (for Women's Fitness Zone exclusion)"
-                    " [male/female]: ")[0].lower()
+        prompt = "Gender (for Women's Fitness Zone exclusion)"
+        gend = self.input(prompt,["male","female"],False)
+
         if gend == 'm':
             return "male"
         return "female"
+
+    def input(self, text, options = None, quit = True):
+        if options:
+            text += ' [' + '/'.join(options) + ']'
+            req = "".join([o[0] for o in options])
+            if quit:
+                req += 'q'
+        text += ': '
+        
+        resp = None
+        while not resp or (options and not resp in req):
+            resp = input(text)
+            if resp == '':
+                resp = None
+            elif options:
+                resp = resp[0].lower()
+        if quit and resp == 'q' or resp == 'quit':
+            #flag to quit current section of program
+            return None
+        return resp
     
     def edit(self):
-        what = None
-        while not what and what not in "uo":
-            what = input("Edit what [user/orders]?: ")[0].lower()
+        what = self.input("Edit what",["user","orders"])
+        if not what:
+            print("Quitting edit mode")
+            return
         if what == 'o':
             self.edit_orders()
         else:
@@ -147,24 +167,29 @@ class User:
         return
 
     def edit_info(self):
-        field = None
-        while not field and field not in "ngup":
-            field = input("Edit what [name/gender/username/password]: ")[0].lower()
+        opts = ["name","gender","username","password"]
+        field = self.input("Edit what",opts)
+        
+        if not field:
+            print("Quitting user info editor")
+            return
+
         if field == 'n':
-            self.name = input("Name: ")
+            self.name = self.input("Name",quit=False)
         elif field == 'g':
             self.gender = self.get_gender()
         elif field == 'u':
-            self.username = input("Queen's NetID: ")
+            self.username = self.input("Queen's NetID",quit=False)
         else:
-            self.password = input("Current NetID password: ")
+            self.password = self.input("Current NetID password",quit=False)
         return
 
     def edit_orders(self):
         print("\nSTARTING ORDER EDITOR\n")
-        inp = None
-        while not inp or inp in "adm":
-            inp = input("Choose an order option [add/delete/modify/quit]: ")[0].lower()
+        opts = ["add","delete","modify","quit"]
+        inp = True
+        while inp:
+            inp = self.input("Choose an order option",opts)
             if inp == 'a':
                 self.add_order()
             elif inp == 'd':
@@ -172,14 +197,17 @@ class User:
             elif inp == 'm':
                 self.modify_order()
 
-        print("\nCLOSING EDITOR\n")
+        print("\nQUITTING ORDER EDITOR\n")
         return
 
     def add_time(self,times):
         added = False
         while not added:
             try:
-                trangestr = input("Time range [??:?? ?M - ??:?? ?M]: ")
+                trangestr = self.input("Time range [??:?? ?M - ??:?? ?M]: ")
+                if not trangestr:
+                    print("Aborting time range addition")
+                    return
                 t1, t2 = trangestr.split(' - ')
                 added = times.add_range(TimeRange(t1, t2))
             except:
@@ -195,7 +223,11 @@ class User:
         removed = False
         while not removed:
             try:
-                n = int(input("Number of time range to remove: ").strip(" ."))
+                num = self.input("Number of time range to remove")
+                if not num:
+                    print("Aborting time range removal")
+                    return
+                n = int(num.strip(" ."))
                 removed = times.delete_range(n-1)
             except:
                 print("Please enter a valid time range number")
@@ -204,30 +236,40 @@ class User:
     def edit_times(self,times):
         if len(times.time_ranges) == 0:
             self.add_time(times)
-        action = None
-        while not action or action in "ra":
+        action = True
+        while action:
             print("\nCurrent time ranges:")
             times.print_ranges(prefix='\t',numbered=True)
             
-            action = input("Select time range action [add/remove/quit]: ")[0].lower()
+            opts = ["add","remove","quit"]
+            action = self.input("Select time range action",opts)
             if action == 'a':
                 self.add_time(times)
             elif action == 'r':
                 self.remove_time(times)
-            else:
+            elif not action:
                 if len(times.time_ranges) == 0:
                     print("Add at least one time range to quit.")
-                    action = None
+                    action = True
         return
     
     def add_area(self,areas):      
-        area = input("Enter name of workout area or a search term: ")
+        area = self.input("Enter name of workout area or a search term")
+        if not area:
+            print("Aborting area addition")
+            return
         if len(areas) == 0:
             areas.append(area)
             return
-        place = None
-        while not place:
-            place = input("Priority [first/last/<n>]: ").strip(" .")
+
+        opts = ["first","last","<n>"]
+        valid = False
+        while not valid:
+            placestr = self.input("Priority",opts)
+            if not placestr:
+                print("Aborting area addition")
+                return
+            place = placestr.strip(" .")
             if place[0].lower() == "f":
                 place = 1
             elif place[0].lower() == "l":
@@ -241,10 +283,12 @@ class User:
                         place = len(areas) + 1
                 except:
                     print('Enter a valid priority (e.g. "first", "last", "3")')
-                    place = None
+                    continue
+            valid = True
+
         areas.insert(place - 1, area)
         return
-
+#keep changing input functions from here
     def remove_area(self,areas):
         if len(areas) == 0:
             print("No areas to remove!")
