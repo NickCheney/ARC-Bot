@@ -1,111 +1,8 @@
-import os
-import sys
-import pickle
 from orders import OrderList
 from time_ranges import TimeRange, TimeRangeList
-import book_workout
 from datetime import date, time, datetime, timedelta
 import time as tm
 import copy
-
-class Session:
-    def __init__(self,auto=False):
-        self.data_folder = "./data/"
-        self.user_data_file = self.data_folder + "udata.pickle"
-        
-        if not os.path.isfile(self.user_data_file):
-            if auto:
-                print("No user profile, cannot start automatically")
-                self.SeshUser = None
-                return
-            if not os.path.exists(self.data_folder):
-                os.mkdir(self.data_folder)
-            self.SeshUser = User()
-            self.save()
-        else:
-            with open(self.user_data_file,'rb') as f:
-                user = pickle.load(f)
-            #self.SeshUser = User(udata)
-            self.SeshUser = user
-            print(f"Welcome, {self.SeshUser.name}.\n")
-        return
-
-    def start(self):
-        
-        print("Starting program, type CTRL-Z to exit...")
-        #start program here 
-        
-        #make sure list is sorted
-        print("Removing expired orders:")
-        self.SeshUser.orders.remove_expired_orders()
-        self.save()
-        while True:
-            if len(self.SeshUser.orders.orders) == 0:
-                print("No more orders! Add one or more under 'edit'"
-                        " option to start")
-                return
-            next_order = self.SeshUser.orders.next_order()
-            next_ord_time = next_order.earliest_datetime()
-            #can book area exactly 3 days in advance, get to site a minute
-            #early
-            next_book_time = next_ord_time - timedelta(days=3,seconds=60)
-            diff = next_book_time - datetime.now()
-            timestr = "".join(str(diff).split(".")[:-1])
-            otimelen = 16 #max len of output time string?
-            timelen = otimelen
-            while diff.total_seconds() > 0:
-                #not time yet, need to wait
-                #show time remaining
-                print(f"\rHibernating for {timestr} until next booking can be "
-                        "made" + " "*(otimelen - timelen),end = "")
-                sys.stdout.flush()
-                tm.sleep(1.0)
-                diff = next_book_time - datetime.now()
-                timestr = "".join(str(diff).split(".")[:-1])
-                timelen = len(timestr)
-            
-            print("\nAttempting to book next session...")
-            
-            success = book_workout.book_workout(self.SeshUser, next_order)
-            
-            if success:
-                print(f"Booked order {next_order.id}")
-                self.SeshUser.orders.remove_order(next_order.id)
-            else:
-                print(f"Failed to book order {next_order.id}")
-                #try to push back order's first time range to next "quarter"
-                pushed_range = next_order.times.push_range(0)
-                if pushed_range:
-                    print("Pushing up order start time and retrying")
-                    continue
-                
-                #pushing range failed, so delete it
-                next_order.times.delete_range(0)
-                #check if any ranges left
-                if len(next_order.times.time_ranges) == 0:
-                    #order can't be completed, so delete
-                    print(f"Could not book order {next_order.id}, removing")
-                    self.SeshUser.orders.remove_order(next_order.id)
-                    #order removed so no sorting required
-                else:
-                    #range is gone, resort orders and try again
-                    self.SeshUser.orders.sort_orders()
-
-        return
-
-    def edit(self):
-        self.SeshUser.edit()
-        self.save()
-        return
-
-    def view(self):
-        self.SeshUser.orders.print_orders()
-        return
-
-    def save(self):
-        with open(self.user_data_file, 'wb') as f:
-            pickle.dump(self.SeshUser, f)
-        return
 
 class User:
     def __init__(self, data = None):
@@ -247,10 +144,6 @@ class User:
                 self.add_time(times)
             elif action == 'r':
                 self.remove_time(times)
-            elif not action:
-                if len(times.time_ranges) == 0:
-                    print("Add at least one time range to quit.")
-                    action = True
         return
     
     def add_area(self,areas):      
@@ -288,7 +181,7 @@ class User:
 
         areas.insert(place - 1, area)
         return
-#keep changing input functions from here
+    
     def remove_area(self,areas):
         if len(areas) == 0:
             print("No areas to remove!")
@@ -297,7 +190,11 @@ class User:
         removed = False
         while not removed:
             try:
-                n = int(input("Priority number of area to remove: "))
+                num = self.input("Priority number of area to remove: ")
+                if not num:
+                    print("Aborting area removal")
+                    return
+                n = int(num)
                 if n < 1:
                     raise ValueError
                 del areas[n-1]
@@ -309,27 +206,28 @@ class User:
     def edit_areas(self,areas):
         if len(areas) == 0:
             self.add_area(areas)
-        action = None
-        while not action or action in "ra":
+        opts = ["add","remove","quit"]
+        action = True
+        while action:
             print("\nCurrent workout area search terms (in order):")
             for i in range(len(areas)):
                 print(f"\t{i+1}. {areas[i]}")
             
-            action = input("Select area list action [add/remove/quit]: ")[0].lower()
+            action = self.input("Select area list action",opts)
             if action == 'a':
                 self.add_area(areas)
             elif action == 'r':
                 self.remove_area(areas)
-            elif len(areas) == 0:
-                print("Add at least one area to quit.")
-                action = None
         return
 
-    def get_date(self):
+    def get_date(self,dtype = "order"):
         odate = False
         while not odate:
             try:
-                datestr = input("Enter the order date [YYYY-MM-DD]: ")
+                datestr = self.input(f"Enter the {dtype} date [YYYY-MM-DD]")
+                if not datestr:
+                    print("Aborting date input")
+                    return None
                 odate = date.fromisoformat(datestr)
                 if odate < date.today():
                     raise ValueError
@@ -341,26 +239,39 @@ class User:
         print("\nAdding a new order")
         
         odate = self.get_date()
+        if not odate:
+            print("No date, aborting order addition")
+            return
         otimes = TimeRangeList()
         self.edit_times(otimes)
+        if len(otimes.time_ranges) == 0:
+            print("No times, aborting order addition")
+            return
         oalist = []
         self.edit_areas(oalist)
+        if len(oalist) == 0:
+            print("No areas, aborting order addition")
+            return
 
-        #print(odate,otimes,oalist)
-        
-        sconf = input("Create weekly series from order [y/n]?: ")
-        if sconf[0].lower() == 'y':
+        sconf = self.input("Create weekly series from order", opts=['y','n'])
+        if not sconf:
+            print("Aborting order addition")
+            return
+        elif sconf == 'y':
             #create recurring weekly series 
             s_end = False
             while not s_end:
                 try:
-                    datestr = input("Enter the series end date [YYYY-MM-DD]: ")
-                    s_end = date.fromisoformat(datestr)
-                    if s_end < odate:
+                    oedate = self.get_date("series end")
+                    if not oedate:
+                        print("No date, aborting order addition")
+                        return
+                    if oedate < odate:
                         raise ValueError
+                    s_end = True
                 except:
-                    print("Please enter a valid date after series start")
-            self.orders.add_series(odate, otimes, oalist, s_end)
+                    print("Please enter a date after series start")
+            self.orders.add_series(odate, otimes, oalist, oedate)
         else:
             self.orders.add_order(odate, otimes, oalist)
         return
@@ -371,15 +282,21 @@ class User:
             return
         ntype = "Order"
         self.orders.print_orders()
-        do_series = input("Delete a series or single order [series/order]?: ")
-        series = do_series[0].lower() == 's'
+        do_series = self.input("Delete a series or single order?",["series","order"])
+        if not do_series:
+            print("Aborting order deletion")
+            return
+        series = do_series == 's'
         if series:
             ntype = "Series"
 
         deleted = False
         while not deleted:
             try:
-                nstr = input(f"{ntype} number to delete: ")
+                nstr = self.input(f"{ntype} number to delete")
+                if not nstr:
+                    print("Aborting order deletion")
+                    return
                 num = int(nstr)
                 if series:
                     deleted = self.orders.remove_series(num)
@@ -397,40 +314,54 @@ class User:
         order = False
         while not order:
             try:
-                oid = int(input("Order number to modify: "))
+                oistr = self.input("Order number to modify")
+                if not oistr:
+                    print("Aborting order modification")
+                    return
+                oid = int(oistr)
                 order = self.orders.get_order(oid)
             except:
                 print(f"Please enter a valid order number from above")
         
         do_series = False
         if order.series:
-            resp = input("Modify entire series or just this order "
-                    "[series/order]?: ")
-            do_series = resp[0].lower() == 's'
+            resp = self.input("Modify entire series or just this order?",
+                    ["series","order"])
+            if not resp:
+                print("Aborting order modification")
+                return
+            do_series = resp == 's'
 
         if do_series:
-            opts = "ta"
             options = "[times/areas]"
         else:
-            opts = "dta"
             options = "[date/times/areas]"
 
         #get the value to modify here
-        mtype = None
-        while not mtype or mtype not in opts: 
-            mtype = input(f"Modify what {options}?: ")[0].lower()
-
-        if mtype == 'a':
+        mtype = self.input("Modify what?",options)
+        if not mtype:
+            print("Aborting order modification")
+            return
+        elif mtype == 'a':
             #modify copy then see if it works with order list 
             val = copy.deepcopy(order.areas)
             self.edit_areas(val)
+            if len(val) == 0:
+                print("No areas, aborting order modification")
+                return
 
         elif mtype == 't':
             val = copy.deepcopy(order.times)
             self.edit_times(val)
+            if len(val.time_ranges) == 0:
+                print("No times, aborting order modification")
+                return
 
         else:
             val = self.get_date()
+            if not val:
+                print("No date, aborting order modification")
+                return
 
         if do_series:
             self.orders.modify_series(order.series, val)

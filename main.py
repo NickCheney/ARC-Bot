@@ -3,30 +3,31 @@ Main entry point for program event loop
 """
 import sys
 from book_workout import book_workout
-from user import Session
+from session import Session
+
 def main():
     args = sys.argv[1:]
     if "-s" in args or "--s" in args:
         #start automatically
-        session = Session(auto=True)
-        if session.SeshUser:
-            session.start()
+        sesh = Session(auto=True)
+        if sesh.SeshUser:
+            sesh.start()
         return
-    session = Session()
-    user = session.SeshUser
+    sesh = Session()
+    user = sesh.SeshUser
     opts = ["start","edit","view","quit"]
     action = True
     while action:
         action = user.input("Select an option",opts,True)
         if action == 's':
-            session.start()
+            sesh.start()
         elif action == 'e':
-            session.edit()
+            sesh.edit()
         elif action == 'v':
-            session.view()
+            sesh.view()
         
     print("Saving and exiting")
-    session.save()
+    sesh.save()
 
     return
 
