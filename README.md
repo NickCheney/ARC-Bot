@@ -15,7 +15,11 @@ Please see https://chromedriver.chromium.org/security-considerations for suggest
 ChromeDriver was started successfully.
 ```
 ### **Linux**
-Find the latest version under releases and download. Run `./arcbot` from the installation directory or add to `$PATH` for easy access. Alternatively, you can fork and clone the repo to run the program in your own python environment. To ensure you have all the requirements
+First, ensure X virtual frame buffer is installed with:
+```
+sudo apt-get install xvfb
+```
+Then find the latest version under releases and download. Currently the only architecture supported is x86_64 but arm executables will be available soon. Run `./arcbot` from the installation directory or add to `$PATH` for easy access. Alternatively, you can fork and clone the repo to run the program in your own python environment. To ensure you have all the requirements
 ### **Windows**
 Coming soon...
 ## Usage
