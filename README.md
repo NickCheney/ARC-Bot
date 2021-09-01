@@ -19,7 +19,15 @@ First, ensure X virtual frame buffer is installed with:
 ```
 sudo apt-get install xvfb
 ```
-Then find the latest version under releases and download. Currently the only architecture supported is x86_64 but arm executables will be available soon. Run `./arcbot` from the installation directory or add to `$PATH` for easy access. Alternatively, you can fork and clone the repo to run the program in your own python environment. To ensure you have all the requirements
+Then find the latest version under releases and download. Currently the only architecture supported is x86_64 but arm executables will be available soon. If downloading via CLI use:
+```
+curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest \
+  | grep browser_download_url \
+  | grep linux \
+  | cut -d '"' -f 4 \
+  | wget -qi -
+```
+Run `./arcbot` from the installation directory or add to `$PATH` for easy access. Alternatively, you can fork and clone the repo to run the program in your own python environment. To ensure you have all the requirements
 ### **Windows**
 Coming soon...
 ## Usage
