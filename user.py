@@ -13,14 +13,12 @@ class User:
         
         self.gender = self.get_gender()
 
-        self.netid = self.input("Queen's NetID",quit=False)
+        self.username = self.input("Queen's NetID",quit=False)
         
         self.password = self.input("Current NetID password",quit=False)
         
         self.orders = OrderList()
-        get_ord = self.input("Add orders?",['y','n'],False)
-        if get_ord == 'y':
-            self.edit_orders()
+        
         print("Setup successful!\n")
         return
 
@@ -253,7 +251,7 @@ class User:
             print("No areas, aborting order addition")
             return
 
-        sconf = self.input("Create weekly series from order", opts=['y','n'])
+        sconf = self.input("Create weekly series from order", ['y','n'])
         if not sconf:
             print("Aborting order addition")
             return

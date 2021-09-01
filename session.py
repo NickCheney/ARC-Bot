@@ -20,10 +20,11 @@ class Session:
                 os.mkdir(self.data_folder)
             self.SeshUser = User()
             self.save()
+            print("Add some orders to get started!")
+            self.SeshUser.edit_orders()
         else:
             with open(self.user_data_file,'rb') as f:
                 user = pickle.load(f)
-            #self.SeshUser = User(udata)
             self.SeshUser = user
             print(f"Welcome, {self.SeshUser.name}.\n")
         return

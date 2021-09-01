@@ -1,4 +1,7 @@
 .venv
 log.txt
 data/
+build/
+dist/
+*.spec
 __pycache__/
