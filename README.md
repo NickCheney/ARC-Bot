@@ -4,7 +4,7 @@ Automated Gym Session Booking for Queen's University Athletics and Recreation Ce
 All reservations are currently categorized by the gym area name and equipment available, together know as the category (e.g. *"LL1 Lifting Zone - Squat Racks"*, *"L2 Cardio Zone 1 - Treadmills"*). Gym sessions are currently 1 hour in length and can be booked starting exactly 3 days prior.
 
 ## Installation
-###Prerequisites
+### Prerequisites
 You must have the chromedriver executable installed and on `$PATH` in order for the program to run. Find the correct version for your Chrome here: https://chromedriver.chromium.org/downloads
 
 To verify, type `chromedriver` and you should see something like the following:
