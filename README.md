@@ -86,4 +86,4 @@ The following line can be used to run the program in the background in linux wit
 $python main.py -s > log.txt &
 $
 ```
-To start the program automatically on boot up, add the path to `arcbot` to your `$PATH` variable and edit `~/.bashrc` to include `arcbot -s > acbot-log.txt`. Check program output anytime with `cat ~/arcbot-log.txt`
+To start the program automatically on boot up, add the path to `arcbot` to your `$PATH` variable and edit `~/.bashrc` to include the above command. Check program output anytime with `cat ~/arcbot-log.txt`
