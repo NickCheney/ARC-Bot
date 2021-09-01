@@ -19,7 +19,7 @@ First, ensure X virtual frame buffer is installed with:
 ```
 sudo apt-get install xvfb
 ```
-Then find the latest version under releases and download. If downloading via CLI use:
+Then find the tar archive of the latest version under releases and download. If downloading via CLI use:
 ```
 curl -s https://api.github.com/repos/NickCheney/ARC-Bot/releases/latest \
   | grep browser_download_url \
@@ -35,7 +35,7 @@ curl -s https://api.github.com/repos/NickCheney/ARC-Bot/releases/latest \
   | cut -d '"' -f 4 \
   | wget -qi -
 ```
-for ARM.
+for ARM. You can then extract the executable for use with `tar -xf ARC-Bot-Linux*.tar.gz`.
 Run `./arcbot` from the installation directory or add to `$PATH` for easy access. Alternatively, you can fork and clone the repo to run the program in your own python environment. To ensure you have all the requirements
 ### **Windows**
 Coming soon...
