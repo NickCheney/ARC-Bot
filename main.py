@@ -12,6 +12,8 @@ def main():
         sesh = Session(auto=True)
         if sesh.SeshUser:
             sesh.start()
+            print("Saving and exiting")
+            sesh.save()
         return
     sesh = Session()
     user = sesh.SeshUser

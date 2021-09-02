@@ -89,7 +89,7 @@ class Session:
                 else:
                     #range is gone, resort orders and try again
                     self.SeshUser.orders.sort_orders()
-
+            self.save()
         return
 
     def edit(self):
