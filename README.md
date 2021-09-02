@@ -15,7 +15,28 @@ Please see https://chromedriver.chromium.org/security-considerations for suggest
 ChromeDriver was started successfully.
 ```
 ### **Linux**
-Find the latest version under releases and download. Run `./arcbot` from the installation directory or add to `$PATH` for easy access. Alternatively, you can fork and clone the repo to run the program in your own python environment. To ensure you have all the requirements
+First, ensure X virtual frame buffer is installed with:
+```
+sudo apt-get install xvfb
+```
+Then find the tar archive of the latest version under releases and download. If downloading via CLI use:
+```
+curl -s https://api.github.com/repos/NickCheney/ARC-Bot/releases/latest \
+  | grep browser_download_url \
+  | grep Linux-x86 \
+  | cut -d '"' -f 4 \
+  | wget -qi -
+```
+for x86 architecture or 
+```
+curl -s https://api.github.com/repos/NickCheney/ARC-Bot/releases/latest \
+  | grep browser_download_url \
+  | grep Linux-ARM \
+  | cut -d '"' -f 4 \
+  | wget -qi -
+```
+for ARM. You can then extract the executable for use with `tar -xf ARC-Bot-Linux*.tar.gz`.
+Run `./arcbot` from the installation directory or add to `$PATH` for easy access. Alternatively, you can fork and clone the repo to run the program in your own python environment. To ensure you have all the requirements
 ### **Windows**
 Coming soon...
 ## Usage
@@ -65,4 +86,4 @@ The following line can be used to run the program in the background in linux wit
 $python main.py -s > log.txt &
 $
 ```
-To start the program automatically on boot up, add the path to `arcbot` to your `$PATH` variable and edit `~/.bashrc` to include `arcbot -s > acbot-log.txt`. Check program output anytime with `cat ~/arcbot-log.txt`
+To start the program automatically on boot up, add the path to `arcbot` to your `$PATH` variable and edit `~/.bashrc` to include the above command. Check program output anytime with `cat ~/arcbot-log.txt`
