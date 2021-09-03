@@ -79,8 +79,10 @@ def book_workout(user, order):
 
                 #attempt to make reservation within required timeframe on correct date
                 timeslots = driver.find_elements_by_xpath('//*[@id="mainContent"]/div[2]/section/div')
-                #tm.sleep(5.0)
-                #print(timeslots)
+                
+                #temporary workaround for some registration pages with bold text
+                if len(timeslots) == 0:
+                    timeslots = driver.find_elements_by_xpath('//*[@id="mainContent"]/div[2]/b/b/section/div')
                 for slot in timeslots:
                     #get date for sessions timeslot
                     slot_date = str_to_date(slot.find_element_by_xpath(".//div/div/label").text)
