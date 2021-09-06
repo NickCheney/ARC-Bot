@@ -18,7 +18,9 @@ ChromeDriver was started successfully.
 Python 3.X is required for compilation
 
 Next, clone this repo with the following:
-```git clone https://github.com/NickCheney/ARC-Bot.git```
+```
+git clone https://github.com/NickCheney/ARC-Bot.git
+```
 
 ### **Linux**
 First, ensure X virtual frame buffer is installed with:
