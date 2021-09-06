@@ -5,8 +5,8 @@ All reservations are currently categorized by the gym area name and equipment av
 
 ## Installation
 ### Prerequisites
-You must have the chromedriver executable installed and on `$PATH` in order for the program to run. Find the correct version for your Chrome here: https://chromedriver.chromium.org/downloads
-
+#### Chromedriver
+You must have the chromedriver executable installed and on `PATH` in order for the program to run. Check your chrome version at chrome://settings/help on windows or via `google-chrome --version` on linux, then find the corrosponding chromedriver version here: https://chromedriver.chromium.org/downloads
 To verify, type `chromedriver` and you should see something like the following:
 ```
 Starting ChromeDriver 92.0.4515.107 (87a818b10553a07434ea9e2b6dccf3cbe7895134-refs/branch-heads/4515@{#1634}) on port 9515
@@ -14,6 +14,12 @@ Only local connections are allowed.
 Please see https://chromedriver.chromium.org/security-considerations for suggestions on keeping ChromeDriver safe.
 ChromeDriver was started successfully.
 ```
+#### Python
+Python 3.X is required for compilation
+
+Next, clone this repo with the following:
+```git clone https://github.com/NickCheney/ARC-Bot.git```
+
 ### **Linux**
 First, ensure X virtual frame buffer is installed with:
 ```
