@@ -5,7 +5,7 @@ All reservations are currently categorized by the gym area name and equipment av
 
 ## Installation
 ### Prerequisites
-#### Chromedriver
+#### 1. Chromedriver
 You must have the chromedriver executable installed and on `PATH` in order for the program to run. Check your chrome version at chrome://settings/help on windows or via `google-chrome --version` on linux, then find the corrosponding chromedriver version here: https://chromedriver.chromium.org/downloads
 To verify, type `chromedriver` and you should see something like the following:
 ```
@@ -14,36 +14,27 @@ Only local connections are allowed.
 Please see https://chromedriver.chromium.org/security-considerations for suggestions on keeping ChromeDriver safe.
 ChromeDriver was started successfully.
 ```
-#### Python
+#### 2. Python
 Python 3.X is required for compilation
 
 Next, clone this repo with the following:
 ```
 git clone https://github.com/NickCheney/ARC-Bot.git
 ```
-
+Then install all required modules with:
+```
+pip install -r requirements.txt
+```
+Then follow the specific instructions below for your OS.
 ### **Linux**
 First, ensure X virtual frame buffer is installed with:
 ```
 sudo apt-get install xvfb
 ```
-Then find the tar archive of the latest version under releases and download. If downloading via CLI use:
+Then install all required modules with
 ```
-curl -s https://api.github.com/repos/NickCheney/ARC-Bot/releases/latest \
-  | grep browser_download_url \
-  | grep Linux-x86 \
-  | cut -d '"' -f 4 \
-  | wget -qi -
+pip install -r requirements.txt
 ```
-for x86 architecture or 
-```
-curl -s https://api.github.com/repos/NickCheney/ARC-Bot/releases/latest \
-  | grep browser_download_url \
-  | grep Linux-ARM \
-  | cut -d '"' -f 4 \
-  | wget -qi -
-```
-for ARM. You can then extract the executable for use with `tar -xf ARC-Bot-Linux*.tar.gz`.
 Run `./arcbot` from the installation directory or add to `$PATH` for easy access. Alternatively, you can fork and clone the repo to run the program in your own python environment. To ensure you have all the requirements
 ### **Windows**
 Coming soon...
@@ -91,7 +82,7 @@ Hibernating for 17:46:46 until next booking can be made
 ```
 The following line can be used to run the program in the background in linux without terminal output (add `nohup` if accessing remotely):
 ```
-$python main.py -s > log.txt &
+$./arcbot -s > log.txt &
 $
 ```
 To start the program automatically on boot up, add the path to `arcbot` to your `$PATH` variable and edit `~/.bashrc` to include the above command. Check program output anytime with `cat ~/arcbot-log.txt`
