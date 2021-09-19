@@ -104,7 +104,7 @@ class OrderList:
     def add_series(self, sdate, times, alist, until,repeat=timedelta(days=7)):
         currDate = sdate
         while currDate <= until:
-            self.add_order(currDate, times, alist, self.next_series_id)
+            self.add_order(currDate, copy.deepcopy(times), copy.deepcopy(alist), self.next_series_id)
             currDate += repeat
         
         print(f"Series {self.next_series_id} successfully added!")
@@ -199,7 +199,7 @@ class OrderList:
 
         if ids:
             for _id in ids:
-                self.modify_order(_id, val, True)
+                self.modify_order(_id, copy.deepcopy(val), True)
             print(f"Series {series_id} modified.")
             self.sort_orders()
         return

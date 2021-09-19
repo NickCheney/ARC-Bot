@@ -1,7 +1,14 @@
+altgraph==0.17.2
 beautifulsoup4==4.9.3
 bs4==0.0.1
 EasyProcess==0.3
+importlib-metadata==4.8.1
+pkg-resources==0.0.0
+pyinstaller==4.5.1
+pyinstaller-hooks-contrib==2021.3
 PyVirtualDisplay==2.2
 selenium==3.141.0
 soupsieve==2.2.1
+typing-extensions==3.10.0.2
 urllib3==1.26.6
+zipp==3.5.0

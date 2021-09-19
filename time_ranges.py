@@ -50,12 +50,13 @@ class TimeRangeList:
             rng = self.time_ranges[ndx]
         except:
             print("Invalid time range index")
-        to_add = 15 - rng.t1.minutes % 15
-        new_start = rng.t1 + timedelta(minutes=to_add)
-        if rng.t2 - new_start < timdelta(hours=1):
+        to_add = 15 - rng.t1.minute % 15
+        new_start = datetime.combine(date.today(), rng.t1) + timedelta(minutes=to_add)
+        range_end = datetime.combine(date.today(), rng.t2)
+        if range_end - new_start < timedelta(hours=1):
             #can't push, period too short
             return False
-        rng.t1 = new_start
+        rng.t1 = new_start.time()
         return True
 
     def delete_range(self, ndx):
