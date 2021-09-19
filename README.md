@@ -35,7 +35,11 @@ Then install all required modules with
 ```
 pip install -r requirements.txt
 ```
-Run `./arcbot` from the installation directory or add to `$PATH` for easy access. Alternatively, you can fork and clone the repo to run the program in your own python environment. To ensure you have all the requirements
+Then you can run the program with `main.py` or compile into an executable (what I would recommend) with the following:
+```
+pyinstaller main.py --onefile --name arcbot
+```
+Run `./arcbot` from the installation directory `./dist` or add to `$PATH` for easy access. Alternatively, you can fork and clone the repo to run the program in your own python environment.
 ### **Windows**
 Coming soon...
 ## Usage
