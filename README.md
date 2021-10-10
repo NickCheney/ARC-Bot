@@ -31,10 +31,6 @@ First, ensure X virtual frame buffer is installed with:
 ```
 sudo apt-get install xvfb
 ```
-Then install all required modules with
-```
-pip install -r requirements.txt
-```
 Then you can run the program with `main.py` or compile into an executable (what I would recommend) with the following:
 ```
 pyinstaller main.py --onefile --name arcbot
