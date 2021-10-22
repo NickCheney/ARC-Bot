@@ -10,6 +10,7 @@ from datetime import date, time, datetime, timedelta
 import traceback
 import os
 import sys
+from window import Window
 
 def str_to_date(date):
     return datetime.strptime(date, "%A, %B %d, %Y").date()
@@ -35,9 +36,10 @@ def book_workout(user, order):
     times = order.times.time_ranges
 
     try:
-        display = Display(visible=0,size=(1500,1000))
-        display.start()
-        driver = webdriver.Chrome()
+        #display = Display(visible=0,size=(1500,1000))
+        #display.start()
+        window = Window()        
+        driver = window.driver
         #get first page
         driver.get(BASE_URL)
         #accept cookies
@@ -118,8 +120,9 @@ def book_workout(user, order):
                                     card_button.click()
                                     #driver.find_element_by_xpath('//*[@id="ExistingCardsModal"]/div/div/div[2]/div/div[2]/button').click()
                                     print('Success!')
-                                    driver.quit()
-                                    display.stop()
+                                    #driver.quit()
+                                    #display.stop()
+                                    window.close()
                                     return True
                 driver.back()
             
@@ -127,6 +130,7 @@ def book_workout(user, order):
         print("Error during booking session!")
         traceback.print_exc()
     
-    driver.quit()
-    display.stop()
+    #driver.quit()
+    #display.stop()
+    window.close()
     return False
