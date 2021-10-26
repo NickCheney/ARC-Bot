@@ -25,12 +25,12 @@ Then install all required modules with:
 ```
 pip install -r requirements.txt
 ```
-Then follow the specific instructions below for your OS.
 ### **Linux Only:**
 *Ensure X virtual frame buffer is installed with:*
 ```
 sudo apt-get install xvfb
 ```
+### Application
 Then you can run the program with `python main.py` or compile into an executable (what I would recommend) with the following:
 ```
 pyinstaller main.py --onefile --name arcbot
