@@ -26,18 +26,17 @@ Then install all required modules with:
 pip install -r requirements.txt
 ```
 Then follow the specific instructions below for your OS.
-### **Linux**
-First, ensure X virtual frame buffer is installed with:
+### **Linux Only:**
+*Ensure X virtual frame buffer is installed with:*
 ```
 sudo apt-get install xvfb
 ```
-Then you can run the program with `main.py` or compile into an executable (what I would recommend) with the following:
+Then you can run the program with `python main.py` or compile into an executable (what I would recommend) with the following:
 ```
 pyinstaller main.py --onefile --name arcbot
 ```
 Run `./arcbot` from the installation directory `./dist` or add to `$PATH` for easy access. Alternatively, you can fork and clone the repo to run the program in your own python environment.
-### **Windows**
-Coming soon...
+
 ## Usage
 The program is currently implemented as a text-based terminal tool, with the potential for a GUI based application in the future. Prompt options are given in brackets and can be selected with the full option name or the first character:
 ```
